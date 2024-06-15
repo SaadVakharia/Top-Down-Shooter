@@ -1,0 +1,46 @@
+[gd_scene load_steps=4 format=3 uid="uid://cpiikdrh5tnqd"]
+
+[ext_resource type="PackedScene" uid="uid://ogik4s70pgwl" path="res://characters/slime/slime.tscn" id="1_nqhlj"]
+
+[sub_resource type="GDScript" id="GDScript_dribh"]
+script/source = "extends CharacterBody2D
+
+@onready var player = $\"../Player\"
+
+var health = 3
+
+func _ready():
+	%Slime.play_walk()
+
+func _physics_process(delta):
+	var direction = global_position.direction_to(player.global_position)
+	velocity = direction * 12000 * delta
+	move_and_slide()
+
+func take_damage():
+	health -= 1
+	%Slime.play_hurt()
+	
+	if health == 0:
+		queue_free()
+		const SMOKE_EXPLOSION = preload(\"res://smoke_explosion/smoke_explosion.tscn\")
+		var smoke = SMOKE_EXPLOSION.instantiate()
+		get_parent().add_child(smoke)
+		
+		smoke.global_position = global_position
+"
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_ge0fx"]
+radius = 33.0151
+
+[node name="Mob" type="CharacterBody2D"]
+collision_layer = 2
+collision_mask = 3
+script = SubResource("GDScript_dribh")
+
+[node name="Slime" parent="." instance=ExtResource("1_nqhlj")]
+unique_name_in_owner = true
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(0, -10)
+shape = SubResource("CircleShape2D_ge0fx")
